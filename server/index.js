@@ -27,6 +27,7 @@ app.post('/create-user', async (req, res) => {
         return res.json({ error: "Email already exists", created: false });
       } else {
         const user = await UserModel.create(req.body);
+        console.log(user,"new user addedd")
         return res.json(user);
       }
     } catch (error) {
@@ -35,21 +36,32 @@ app.post('/create-user', async (req, res) => {
   });
   app.put('/update', async (req, res) => {
     try {
-      const { id, names, emails, ages } = req.body; // Extract id and other data from the request body
+      const { id, names, emails, ages} = req.body;  
       console.log(req.body)
   
       const updateuser = await UserModel.findByIdAndUpdate(id, {
         name: names,
         email: emails,
         age: ages
-      }, { new: true }); // Use { new: true } to get the updated document
-  
+      }, { new: true });  
       res.json({ updateuser, message: 'successfully updated' });
     } catch (error) {
       // Handle errors
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+  app.delete('/delete/:id', async (req, res) => {
+    try {
+      const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
+      if (!deletedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json({ deletedUser, message: 'Deleted Successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
   
   
 
