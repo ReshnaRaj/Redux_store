@@ -1,6 +1,7 @@
 import  {createSlice} from '@reduxjs/toolkit'
 const userSlice=createSlice({
     name:'users',
+    // this name is should be same as in written in store actions  [ Represents the name of the slice in the Redux store, in this case, 'users'.]
     initialState:{
         users:[]
     
@@ -20,6 +21,7 @@ const userSlice=createSlice({
         }
         ,addUser:(state,action)=>{
             state.users.push(action.payload)
+            
         },
         updateUser:(state,action)=>{
             const index=state.users.findIndex(x=>x.id===action.payload.id)
@@ -34,7 +36,7 @@ const userSlice=createSlice({
         removeUser:(state,action)=>{
 
             const id=action.payload.id;
-            state.users=state.users.filter(u=>u._id!==id)
+            state.users=state.users.filter(u=>u.id!==id)
         }
 
     }
