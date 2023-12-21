@@ -39,17 +39,20 @@ app.post('/create-user', async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
   });
-  app.put('/update', async (req, res) => {
+  app.put('/update/:id', async (req, res) => {
     try {
       console.log("updations working..")
-      const { id, names, emails, ages} = req.body;  
+      const id=req.params.id
+      console.log(id,"user id")
+      const {name, email, age} = req.body;  
       console.log(req.body)
   
-      const updateuser = await UserModel.findByIdAndUpdate(id, {
-        name: names,
-        email: emails,
-        age: ages
-      }, { new: true });  
+      const updateuser = await UserModel.findByIdAndUpdate({_id:id},{
+         name:name,
+         email:email,
+         age:age
+      })
+         
       res.json({ updateuser, message: 'successfully updated' });
     } catch (error) {
       // Handle errors
