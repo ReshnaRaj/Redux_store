@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect} from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getUser, updateUser, removeUser } from "../redux/userSlice";
-import { useParams, Link } from "react-router-dom";
+import { getUser, removeUser } from "../redux/userSlice";
+import { Link } from "react-router-dom";
 import Page from "./Page";
 
 const Table = () => {
- 
-  const navigate=useNavigate()
- 
+  const navigate = useNavigate();
+
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users.users);
-   
-   
- 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,27 +18,23 @@ const Table = () => {
         const response = await axios.get("http://localhost:4001");
         // console.log(response, "oooo");
         dispatch(getUser(response.data));
+        // response is from the data fetched from the backend and that will be going to set up in store
       } catch (error) {
-        // console.log(error, "error while getting the data");
+        console.log(error, "error while getting the data");
       }
     };
     fetchData();
+     
   }, []);
 
- 
-
- 
-   
-  
-  const handleEdit=async(user)=>{
+  const handleEdit = async (user) => {
     try {
-        console.log(user,"editing   .....")
-        navigate(`/edituser/${user}`);
+      console.log(user, "editing   .....");
+      navigate(`/edituser/${user}`);
     } catch (error) {
-        console.log(error)
-        
+      console.log(error);
     }
-  }
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -56,14 +48,13 @@ const Table = () => {
     }
   };
 
-  
   return (
     <div className="flex justify-center items-center h-screen bg-zinc-600">
       <div className="overflow-x-auto">
         <table className="table bg-black">
           <th>
             <Link to="/adduser">
-              <button className="btn btn-info">Add User  +</button>
+              <button className="btn btn-info">Add User +</button>
             </Link>
           </th>
           <tbody>
@@ -75,11 +66,16 @@ const Table = () => {
                   <td>{user.email}</td>
                   <td>{user.age}</td>
                   <td>
-                  <button className="btn btn-info" onClick={()=>{
-                      console.log(user._id,"user id ")
-                    handleEdit(user.id)
-                  }}>Edit</button>
-                   <button
+                    <button
+                      className="btn btn-info"
+                      onClick={() => {
+                        console.log(user._id, "user id ");
+                        handleEdit(user.id);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
                       className="btn btn-error"
                       onClick={() => {
                         handleDelete(user.id);
@@ -89,7 +85,6 @@ const Table = () => {
                       Delete
                     </button>
                   </td>
-                
                 </tr>
               );
             })}

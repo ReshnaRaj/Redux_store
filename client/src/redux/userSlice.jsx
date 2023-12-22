@@ -1,7 +1,7 @@
 import  {createSlice} from '@reduxjs/toolkit'
 const userSlice=createSlice({
     name:'users',
-    // this name is should be same as in written in store actions  [ Represents the name of the slice in the Redux store, in this case, 'users'.]
+    // this name(users) is should be same as in written in store actions  [ Represents the name of the slice in the Redux store, in this case, 'users'.]
     initialState:{
         users:[]
     
