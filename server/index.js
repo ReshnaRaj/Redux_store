@@ -13,15 +13,34 @@ app.use(
   );
 app.use(express.json())
 dbConnection()
+
 app.get('/', async (req, res) => {
   try {
-    const users = await UserModel.find({});
-    // console.log(users,"ooo")
-    res.json(users);
+    const page = parseInt(req.query.page) || 1; // Default page is 1 if not provided
+    const pageSize = parseInt(req.query.pageSize) || 10; // Default page size is 10 if not provided
+    
+    // Calculate the start and end indexes for the requested page
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = page * pageSize;
+    
+    // Fetch users from the database using pagination
+    const users = await UserModel.find({})
+      .select('id name email age') // Include the fields you want to retrieve
+      .skip(startIndex)
+      .limit(pageSize);
+    
+    // Get the total count of users for calculating total pages
+    const totalCount = await UserModel.countDocuments({});
+    
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    res.json({ users, totalPages });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.post('/create-user', async (req, res) => {
     try {

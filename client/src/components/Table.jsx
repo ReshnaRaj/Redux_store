@@ -1,4 +1,4 @@
-import React, { useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -7,29 +7,34 @@ import { Link } from "react-router-dom";
 import Page from "./Page";
 
 const Table = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users.users);
 
+  const pageSize = 5; // Number of items per page (changed to 5)
+
+ // Inside the fetchData function
+const fetchData = async (page) => {
+  try {
+    const response = await axios.get(`http://localhost:4001?page=${page}&pageSize=${pageSize}`);
+    const modifiedData = response.data.users.map((user) => ({ ...user, id: user._id })); // Assuming the ID field is "_id" in the response
+    dispatch(getUser(modifiedData));
+    setTotalPages(response.data.totalPages);
+  } catch (error) {
+    console.log(error, "error while getting the data");
+  }
+};
+
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:4001");
-        // console.log(response, "oooo");
-        dispatch(getUser(response.data));
-        // response is from the data fetched from the backend and that will be going to set up in store
-      } catch (error) {
-        console.log(error, "error while getting the data");
-      }
-    };
-    fetchData();
-     
-  }, []);
+    fetchData(currentPage);
+  }, [currentPage]);
 
   const handleEdit = async (user) => {
     try {
-      console.log(user, "editing   .....");
       navigate(`/edituser/${user}`);
     } catch (error) {
       console.log(error);
@@ -38,13 +43,23 @@ const Table = () => {
 
   const handleDelete = async (id) => {
     try {
-      // console.log(id, "id of the data");
-      axios.delete(`http://localhost:4001/delete/${id}`).then((res) => {
-        dispatch(removeUser({ id }));
-      });
+      await axios.delete(`http://localhost:4001/delete/${id}`);
+      dispatch(removeUser({ id }));
     } catch (error) {
       console.error("Error occurred:", error);
       // Handle errors here
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
@@ -60,7 +75,7 @@ const Table = () => {
           <tbody>
             {users.map((user) => {
               return (
-                <tr className="text-red-600">
+                <tr key={user.id} className="text-red-600">
                   <td>{user.id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -69,7 +84,6 @@ const Table = () => {
                     <button
                       className="btn btn-info"
                       onClick={() => {
-                        console.log(user._id, "user id ");
                         handleEdit(user.id);
                       }}
                     >
@@ -79,7 +93,6 @@ const Table = () => {
                       className="btn btn-error"
                       onClick={() => {
                         handleDelete(user.id);
-                        console.log(user.id, "ooo");
                       }}
                     >
                       Delete
@@ -89,7 +102,18 @@ const Table = () => {
               );
             })}
           </tbody>
-          <Page />
+          <tfoot>
+            <tr>
+              <td colSpan="5" className="flex justify-between">
+                <button onClick={handlePrevPage} disabled={currentPage === 1}>
+                  Previous Page
+                </button>
+                <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+                  Next Page
+                </button>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
