@@ -4,30 +4,37 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUser, removeUser } from "../redux/userSlice";
 import { Link } from "react-router-dom";
-import Page from "./Page";
 
 const Table = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [userz, setUserz] = useState([]);
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const users = useSelector((state) => state.users.users);
-
+console.log(users,"fetched all users")
   const pageSize = 5; // Number of items per page (changed to 5)
 
- // Inside the fetchData function
-const fetchData = async (page) => {
-  try {
-    const response = await axios.get(`http://localhost:4001?page=${page}&pageSize=${pageSize}`);
-    const modifiedData = response.data.users.map((user) => ({ ...user, id: user._id })); // Assuming the ID field is "_id" in the response
-    dispatch(getUser(modifiedData));
-    setTotalPages(response.data.totalPages);
-  } catch (error) {
-    console.log(error, "error while getting the data");
-  }
-};
-
+  // Inside the fetchData function
+  const fetchData = async (page) => {
+    // console.log(page,"pages number")
+    try {
+      const response = await axios.get(
+        `http://localhost:4001?page=${page}&pageSize=${pageSize}`
+      );
+      // console.log(response,"response from the backend")
+      const modifiedData = response.data.users.map((user) => ({
+        ...user,
+        id: user._id,
+      })); // Assuming the ID field is "_id" in the response
+      // console.log(modifiedData,"99999")
+      dispatch(getUser(modifiedData));
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.log(error, "error while getting the data");
+    }
+  };
 
   useEffect(() => {
     fetchData(currentPage);
@@ -52,17 +59,47 @@ const fetchData = async (page) => {
   };
 
   const handlePrevPage = () => {
+    console.log(currentPage, "previos button");
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+      console.log(currentPage, "after prev");
     }
   };
 
   const handleNextPage = () => {
+    console.log(currentPage, "next button");
+    console.log(totalPages, "total button");
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
+const searchHandle = async (e) => {
+  try {
+    const item = e.target.value;
+    if (item) {
+      const response = await axios.get(
+        `http://localhost:4001/search/${item}`
+      );
+      console.log(response.data, "correct search");
 
+      if (response.data && response.data.length > 0) {
+        setUserz(response.data);
+      } else {
+        setUserz([]);
+      }
+    } else {
+      fetchData(currentPage);
+      setUserz([]);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+  
+  console.log(userz, "ooo");
+
+  // console.log(totalPages,currentPage,"total pages")
   return (
     <div className="flex justify-center items-center h-screen bg-zinc-600">
       <div className="overflow-x-auto">
@@ -72,11 +109,20 @@ const fetchData = async (page) => {
               <button className="btn btn-info">Add User +</button>
             </Link>
           </th>
+          <th>
+            <input
+              type="text"
+              className="input input-bordered input-primary"
+              placeholder="search here"
+              onChange={searchHandle}
+            ></input>
+          </th>
+
           <tbody>
-            {users.map((user) => {
+            {(userz.length > 0 ? userz : users).map((user,index) => {
               return (
-                <tr key={user.id} className="text-red-600">
-                  <td>{user.id}</td>
+                <tr key={user._id} className="text-red-600">
+                  {/* <td>{index+1}</td> */}
                   <td>{user.name}</td>
                   <td>{user.email}</td>
                   <td>{user.age}</td>
@@ -101,14 +147,24 @@ const fetchData = async (page) => {
                 </tr>
               );
             })}
+            {/* Display 'No User Found' when userz is empty */}
+             
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan="5" className="flex justify-between">
-                <button onClick={handlePrevPage} disabled={currentPage === 1}>
+              <td colSpan="5" className="flex justify-between ">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className="btn btn-outline text-pink-600"
+                >
                   Previous Page
                 </button>
-                <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="btn btn-outline text-green-600"
+                >
                   Next Page
                 </button>
               </td>

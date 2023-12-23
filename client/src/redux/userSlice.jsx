@@ -17,7 +17,6 @@ const userSlice=createSlice({
                 }
 
             })
-
         }
         ,addUser:(state,action)=>{
             state.users.push(action.payload)
@@ -31,7 +30,6 @@ const userSlice=createSlice({
                 email:action.payload.email,
                 age:action.payload.age
             }
-        
         },
         removeUser:(state,action)=>{
 
